@@ -1,0 +1,31 @@
+# Core libraries
+pandas==2.0.0
+numpy==1.24.3
+requests==2.31.0
+openpyxl==3.1.2
+matplotlib==3.7.1
+seaborn==0.12.2
+
+# Web scraping
+beautifulsoup4==4.12.2
+lxml==4.9.2
+
+# Data analysis
+scikit-learn==1.3.0
+
+# Geospatial
+folium==0.14.0
+geopy==2.3.0
+
+# Excel handling
+xlwings==0.30.10
+
+# Dashboard
+panel==1.1.1
+holoviews==1.16.0
+hvplot==0.8.3
+bokeh==3.1.1
+
+# Utilities
+tqdm==4.65.0
+python-dotenv==1.0.0

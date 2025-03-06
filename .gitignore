@@ -1,0 +1,41 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Development environments
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Log files
+logs/
+*.log
+
+# Output data
+output/
+
+# User-specific config
+config/credentials.py
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Raw data files
+data/raw/
+data/processed/
