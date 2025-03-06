@@ -30,8 +30,7 @@ logs/
 output/
 
 # User-specific config
-config/credentials.py
-
+*.secrets
 # OS specific files
 .DS_Store
 Thumbs.db
