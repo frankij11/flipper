@@ -335,7 +335,7 @@ class RedfinConnector:
             from io import StringIO
             r = session.get(file_path)
             #r.html.render()
-            df = pd.read_csv(StringIO(r.html.html))
+            df = pd.read_csv(StringIO(r.html.html)).assign(**{"AS of Date":datetime.now().strftime("%Y-%m-%d")})
             logger.info("fetch data from refin")
             logger.info(df.head())
             #df = pd.read_csv(url)
@@ -345,7 +345,7 @@ class RedfinConnector:
             except:
                 all_df = pd.DataFrame()
             try:
-                pd.concat([all_df,df]).drop_duplicates()
+                all_df = pd.concat([all_df,df]).drop_duplicates()
             except:
                 all_df = df
             all_df.to_csv("data/raw/redfin_properties.csv",index=False)
