@@ -4,6 +4,8 @@ Redfin Connector - Unofficial API access to Redfin property data
 
 import logging
 import requests
+import requests_html
+import pandas as pd
 import re
 import json
 import csv
@@ -26,10 +28,10 @@ class RedfinConnector:
     
     def __init__(self):
         self.base_url = "https://www.redfin.com"
-        self.search_url = f"{self.base_url}/stingray/do/location-autocomplete"
+        self.search_url = "https://www.redfin.com/stingray/api/gis-csv?al=3&fixer=true&has_att_fiber=false&has_deal=false&has_dishwasher=false&has_laundry_facility=false&has_laundry_hookups=false&has_parking=false&has_pool=false&has_short_term_lease=false&include_pending_homes=false&isRentals=false&is_furnished=false&is_income_restricted=false&is_senior_living=false&market=dc&num_homes=350&ord=redfin-recommended-asc&page_number=1&poly=-77.119901%2038.791514%2C-76.9095394%2038.791514%2C-76.9095394%2038.9953797%2C-77.119901%2038.9953797%2C-77.119901%2038.791514&pool=false&region_id=12839&region_type=6&sf=1,2,3,5,6,7&status=9&travel_with_traffic=false&travel_within_region=false&uipt=1,3&utilities_included=false&v=8"#f"{self.base_url}/stingray/do/location-autocomplete"
         self.initial_info_url = f"{self.base_url}/stingray/api/gis"
         self.gis_url = f"{self.base_url}/stingray/api/gis"
-        self.filter_url = f"{self.base_url}/api/v1/search/filterParamsFromQuery"
+        self.filter_url = f"https://www.redfin.com/stingray/api/gis-csv?al=3&fixer=true&has_att_fiber=false&has_deal=false&has_dishwasher=false&has_laundry_facility=false&has_laundry_hookups=false&has_parking=false&has_pool=false&has_short_term_lease=false&include_pending_homes=false&isRentals=false&is_furnished=false&is_income_restricted=false&is_senior_living=false&market=dc&num_homes=350&ord=redfin-recommended-asc&page_number=1&poly=-77.119901%2038.791514%2C-76.9095394%2038.791514%2C-76.9095394%2038.9953797%2C-77.119901%2038.9953797%2C-77.119901%2038.791514&pool=false&region_id=12839&region_type=6&sf=1,2,3,5,6,7&status=9&travel_with_traffic=false&travel_within_region=false&uipt=1,3&utilities_included=false&v=8"#f"{self.base_url}/api/v1/search/filterParamsFromQuery"
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
@@ -68,7 +70,7 @@ class RedfinConnector:
                 "lng": ""
             }
             
-            response = self.session.get(self.search_url, params=params)
+            response = self.session.get(self.search_url)#, params=params)
             response.raise_for_status()
             
             # Parse the response (it's in a special format)
@@ -275,7 +277,7 @@ class RedfinConnector:
                     city=city,
                     state=state,
                     zip_code=zip_code,
-                    list_price=float(prop_data.get('PRICE', '0').replace('$', '').replace(',', '')) if prop_data.get('PRICE') else 0,
+                    list_price=float(prop_data.get('PRICE',0)), #float(prop_data.get('PRICE', '0').replace('$', '').replace(',', '')) if prop_data.get('PRICE') else 0,
                     bedrooms=int(float(prop_data.get('BEDS', 0))) if prop_data.get('BEDS') else 0,
                     bathrooms=float(prop_data.get('BATHS', 0)) if prop_data.get('BATHS') else 0,
                     square_feet=float(prop_data.get('SQUARE FEET', '0').replace(',', '')) if prop_data.get('SQUARE FEET') else 0,
@@ -323,7 +325,32 @@ class RedfinConnector:
                 keywords.append(term)
         
         return keywords
-
+    def get_properties_from_csv(self,file_path: str=None ) -> List[Property]:
+        """
+        Get properties from a CSV file
+        """
+        #file_path = "https://www.redfin.com/stingray/api/gis-csv?al=3&fixer=true&has_att_fiber=false&has_deal=false&has_dishwasher=false&has_laundry_facility=false&has_laundry_hookups=false&has_parking=false&has_pool=false&has_short_term_lease=false&include_pending_homes=false&isRentals=false&is_furnished=false&is_income_restricted=false&is_senior_living=false&market=dc&num_homes=350&ord=redfin-recommended-asc&page_number=1&poly=-77.119901%2038.791514%2C-76.9095394%2038.791514%2C-76.9095394%2038.9953797%2C-77.119901%2038.9953797%2C-77.119901%2038.791514&pool=false&region_id=12839&region_type=6&sf=1,2,3,5,6,7&status=9&travel_with_traffic=false&travel_within_region=false&uipt=1,3&utilities_included=false&v=8"
+        file_path = 'https://www.redfin.com/stingray/api/gis-csv?al=1&market=dc&max_price=500000&min_stories=1&num_homes=350&ord=redfin-recommended-asc&page_number=1&region_id=20065&region_type=6&sf=1,2,3,5,6,7&status=9&uipt=1,2,3,4,5,6&v=8'
+        with requests_html.HTMLSession() as session:
+            from io import StringIO
+            r = session.get(file_path)
+            #r.html.render()
+            df = pd.read_csv(StringIO(r.html.html))
+            logger.info("fetch data from refin")
+            logger.info(df.head())
+            #df = pd.read_csv(url)
+            df.columns = df.columns.str.strip().str.upper().str.replace(' ', '_').str.replace('(', '').str.replace(')', '')
+            try:
+                all_df = pd.read_csv("data/raw/redfin_properties.csv")
+            except:
+                all_df = pd.DataFrame()
+            try:
+                pd.concat([all_df,df]).drop_duplicates()
+            except:
+                all_df = df
+            all_df.to_csv("data/raw/redfin_properties.csv",index=False)
+        
+        return df.to_dict(orient='records') 
 
 def get_properties(location: str, max_price: Optional[float] = None, 
                    property_types: Optional[List[str]] = None) -> List[Property]:
@@ -339,8 +366,6 @@ def get_properties(location: str, max_price: Optional[float] = None,
         List of Property objects
     """
     connector = RedfinConnector()
-    redfin_properties = connector.get_properties_by_location(
-        location, max_price, property_types
-    )
+    redfin_properties = connector.get_properties_from_csv()
     
     return connector.convert_to_property_objects(redfin_properties)

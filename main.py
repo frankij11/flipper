@@ -15,15 +15,18 @@ from visualization import dashboard
 from utils import excel_exporter, notification
 
 # Set up logging
-logging.basicConfig(
+def setup_logging():
+    logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler(f"logs/flip_finder_{datetime.now().strftime('%Y%m%d')}.log"),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
+            logging.StreamHandler()
+        ]
+    )
+    return logging.getLogger(__name__)
+
+logger = setup_logging()
 
 def create_directories():
     """Create necessary directories if they don't exist"""
@@ -88,6 +91,8 @@ def get_properties_from_source(source, area, max_price, days_on_market, property
 def main():
     """Main execution function"""
     create_directories()
+    logger = setup_logging()
+    
     args = parse_arguments()
     
     logger.info("Starting Real Estate Flip Finder")

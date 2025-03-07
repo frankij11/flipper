@@ -56,8 +56,8 @@ def estimate_repairs(property_data: Property) -> float:
     # Add a contingency
     repair_estimate *= 1.1  # 10% contingency
     
-    logger.info(f"Calculated ARV for {property_data.address}: ${arv:,.2f}")
-    return arv
+    logger.info(f"Repair estimate for {property_data.address}: ${repair_estimate:,.2f}")
+    return repair_estimate
 
 def calculate_closing_costs(purchase_price: float, sale_price: float) -> Dict[str, float]:
     """Calculate estimated closing costs for purchase and sale"""
@@ -141,8 +141,7 @@ def analyze_deal(property_data: Property, arv: float, repair_costs: float, min_r
     
     logger.info(f"Deal analysis for {property_data.address}: ROI={roi:.2f}%, Profit=${potential_profit:,.2f}")
     
-    return deal"Estimated repair cost for {property_data.address}: ${repair_estimate:,.2f}")
-    return repair_estimate
+    return deal
 
 def calculate_arv(property_data: Property) -> float:
     """Calculate After Repair Value based on comps"""
@@ -171,4 +170,6 @@ def calculate_arv(property_data: Property) -> float:
     # Calculate ARV based on average price per square foot
     arv = property_data.square_feet * avg_psf
     
-    logger.info(f
+    logger.info(f"Calculated ARV for {property_data.address}: ${arv:,.2f}")
+    return arv
+    
